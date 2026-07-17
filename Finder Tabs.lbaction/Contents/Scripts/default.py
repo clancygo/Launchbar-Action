@@ -4,6 +4,8 @@
 """List each currently open Finder location as a LaunchBar item."""
 
 import json
+import itertools
+import os
 import subprocess
 
 
@@ -51,6 +53,49 @@ def display_title(title, path):
     return title
 
 
+def folder_children(folder_path):
+    """Build an explicit browse list without scanning an entire large folder."""
+    try:
+        with os.scandir(folder_path) as scan:
+            # Read one extra entry so we can signal a truncated list. This keeps
+            # launching Finder Tabs fast even if another window shows a huge
+            # evidence or download directory.
+            entries = list(itertools.islice(scan, 301))
+    except OSError:
+        return [{
+            "title": "无法读取此文件夹",
+            "subtitle": folder_path,
+            "icon": "font-awesome:fa-exclamation-triangle",
+        }]
+
+    truncated = len(entries) > 300
+    entries = [entry for entry in entries[:300] if not entry.name.startswith(".")]
+    entries.sort(
+        key=lambda entry: (
+            not entry.is_dir(follow_symlinks=False),
+            entry.name.casefold(),
+        )
+    )
+
+    children = []
+    for entry in entries:
+        is_folder = entry.is_dir(follow_symlinks=False)
+        children.append({
+            "title": entry.name,
+            "subtitle": "文件夹" if is_folder else entry.path,
+            "path": entry.path,
+            "icon": "font-awesome:fa-folder" if is_folder else "font-awesome:fa-file-o",
+        })
+
+    if truncated:
+        children.append({
+            "title": "仅显示前 300 项",
+            "subtitle": "此目录项目较多；请用 Finder 进一步定位。",
+            "icon": "font-awesome:fa-ellipsis-h",
+        })
+    return children
+
+
 items = []
 for window_id, title, path in finder_windows():
     items.append({
@@ -62,6 +107,9 @@ for window_id, title, path in finder_windows():
         "action": "activate_window.sh",
         # Keep the ID so two windows showing the same folder remain distinct.
         "actionArgument": window_id + "\x1e" + path,
+        # An explicit children array makes Right Arrow browse files instead of
+        # showing generic item information for this action-backed result.
+        "children": folder_children(path),
         "icon": "font-awesome:fa-window-restore",
     })
 
