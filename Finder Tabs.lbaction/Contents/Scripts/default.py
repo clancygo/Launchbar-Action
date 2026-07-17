@@ -4,7 +4,6 @@
 """List each currently open Finder location as a LaunchBar item."""
 
 import json
-import os
 import subprocess
 
 
@@ -13,10 +12,11 @@ tell application "Finder"
 	set rows to {}
 	set finderWindows to (get every Finder window)
 	repeat with finderWindow in finderWindows
-		try
-			set folderPath to POSIX path of ((target of finderWindow) as alias)
-			set windowTitle to name of finderWindow
-			set end of rows to windowTitle & (ASCII character 30) & folderPath
+	try
+		set folderPath to POSIX path of ((target of finderWindow) as alias)
+		set windowTitle to name of finderWindow
+		set windowID to (id of finderWindow) as text
+		set end of rows to windowID & (ASCII character 30) & windowTitle & (ASCII character 30) & folderPath
 		end try
 	end repeat
 end tell
@@ -36,68 +36,32 @@ def finder_windows():
 
     windows = []
     for row in result.stdout.rstrip("\n").split("\x1f"):
-        if not row or "\x1e" not in row:
+        if not row or row.count("\x1e") < 2:
             continue
-        title, path = row.split("\x1e", 1)
-        windows.append((title, path))
+        window_id, title, path = row.split("\x1e", 2)
+        windows.append((window_id, title, path))
     return windows
 
 
-def folder_children(folder_path):
-    """Return the immediate contents for LaunchBar's right-arrow browsing."""
-    try:
-        with os.scandir(folder_path) as scan:
-            entries = list(scan)
-    except OSError:
-        return [{
-            "title": "无法读取此文件夹",
-            "subtitle": folder_path,
-            "icon": "font-awesome:fa-exclamation-triangle",
-        }]
-
-    # Keep Finder-like navigation pleasant: folders first, then names.
-    entries.sort(
-        key=lambda entry: (
-            not entry.is_dir(follow_symlinks=False),
-            entry.name.casefold(),
-        )
-    )
-
-    children = []
-    for entry in entries[:300]:
-        is_folder = entry.is_dir(follow_symlinks=False)
-        children.append({
-            "title": entry.name,
-            "subtitle": "文件夹" if is_folder else entry.path,
-            "path": entry.path,
-            "icon": (
-                "font-awesome:fa-folder"
-                if is_folder
-                else "font-awesome:fa-file-o"
-            ),
-        })
-
-    if len(entries) > 300:
-        children.append({
-            "title": "仅显示前 300 项",
-            "subtitle": "请在 Finder 中缩小范围，或用名称继续筛选。",
-            "icon": "font-awesome:fa-ellipsis-h",
-        })
-    return children
+def display_title(title, path):
+    """Disambiguate same-named folders without sacrificing path navigation."""
+    parent = path.rstrip("/").rsplit("/", 2)
+    if len(parent) == 3 and parent[1]:
+        return f"{title} — {parent[1]}"
+    return title
 
 
 items = []
-for title, path in finder_windows():
+for window_id, title, path in finder_windows():
     items.append({
-        "title": title,
-        "subtitle": "↩ 聚焦窗口  ·  → 浏览文件  ·  " + path,
+        "title": display_title(title, path),
+        "subtitle": path,
+        "alwaysShowsSubtitle": True,
+        "label": "↩ 聚焦  ·  → 浏览",
         "path": path,
-        "quickLookURL": path,
         "action": "activate_window.sh",
-        "actionArgument": path,
-        # Enter invokes the action above. Right Arrow enters these children,
-        # turning the selected Finder window into its actual folder listing.
-        "children": folder_children(path),
+        # Keep the ID so two windows showing the same folder remain distinct.
+        "actionArgument": window_id + "\x1e" + path,
         "icon": "font-awesome:fa-window-restore",
     })
 
