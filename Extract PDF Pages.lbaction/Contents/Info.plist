@@ -16,6 +16,8 @@
             <array>
                 <string>path</string>
             </array>
+            <key>LBRequiresArgument</key>
+            <true/>
             <key>LBScriptName</key>
             <string>default.sh</string>
         </dict>
