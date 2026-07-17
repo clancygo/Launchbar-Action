@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>net.utgd.launchbar.ExtractPDFPages</string>
+    <key>CFBundleName</key>
+    <string>提取 PDF 页码</string>
+    <key>CFBundleIconFile</key>
+    <string>font-awesome:fa-file-pdf</string>
+    <key>LBScripts</key>
+    <dict>
+        <key>LBDefaultScript</key>
+        <dict>
+            <key>LBAcceptedArgumentTypes</key>
+            <array>
+                <string>path</string>
+            </array>
+            <key>LBScriptName</key>
+            <string>default.sh</string>
+        </dict>
+    </dict>
+</dict>
+</plist>
