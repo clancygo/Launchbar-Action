@@ -5,7 +5,7 @@
     <key>CFBundleIdentifier</key>
     <string>net.clancygo.launchbar.WebAggregateSearch</string>
     <key>CFBundleName</key>
-    <string>网页聚合搜索</string>
+    <string>Web Search</string>
     <key>CFBundleIconFile</key>
     <string>font-awesome:fa-search</string>
     <key>LBScripts</key>
