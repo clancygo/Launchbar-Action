@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+  <dict>
+    <key>Activate</key><string>Normal</string>
+    <key>Macros</key>
+    <array>
+      <dict>
+        <key>Actions</key>
+        <array>
+          <dict>
+            <key>MacroActionType</key><string>ExecuteAppleScript</string>
+            <key>Text</key>
+            <string>set recentPaths to {}
+tell application "Microsoft Word"
+	repeat with recentItem in every recent file
+		try
+			set itemPath to POSIX path of (path of recentItem)
+			set itemName to name of recentItem
+			set end of recentPaths to itemPath &amp; "/" &amp; itemName
+		end try
+	end repeat
+end tell
+set AppleScript's text item delimiters to linefeed
+tell application "Keyboard Maestro Engine" to setvariable "WordRecentsPaths" to (recentPaths as text)</string>
+            <key>UseText</key><true/>
+            <key>DisplayKind</key><string>None</string>
+            <key>TrimResults</key><true/>
+            <key>TimeOutAbortsMacro</key><true/>
+          </dict>
+          <dict>
+            <key>MacroActionType</key><string>ExecuteShellScript</string>
+            <key>Text</key>
+            <string>target='/Users/liko/Library/Application Support/LaunchBar/Actions/Document Recents.lbaction/Contents/Scripts/word_recents.txt'
+printf '%s\n' "$KMVAR_WordRecentsPaths" | while IFS= read -r file; do
+  [ -f "$file" ] &amp;&amp; printf '%s\n' "$file"
+done &gt; "$target"</string>
+            <key>UseText</key><true/>
+            <key>Source</key><string>Nothing</string>
+            <key>DisplayKind</key><string>Briefly</string>
+            <key>TrimResults</key><true/>
+            <key>TimeOutAbortsMacro</key><true/>
+          </dict>
+        </array>
+        <key>Name</key><string>Refresh Word Recents for LaunchBar</string>
+        <key>Triggers</key><array/>
+      </dict>
+    </array>
+    <key>Name</key><string>LaunchBar Document Recents</string>
+  </dict>
+</array>
+</plist>
