@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>net.clancygo.launchbar.RunShortcut</string>
+    <key>CFBundleName</key>
+    <string>Run Shortcut</string>
+    <key>CFBundleIconFile</key>
+    <string>font-awesome:fa-magic</string>
+    <key>LBScripts</key>
+    <dict>
+        <key>LBDefaultScript</key>
+        <dict>
+            <key>LBAcceptedArgumentTypes</key>
+            <string>string</string>
+            <key>LBRequiresArgument</key>
+            <true/>
+            <key>LBReturnsResult</key>
+            <true/>
+            <key>LBRunInBackground</key>
+            <true/>
+            <key>LBScriptName</key>
+            <string>default.py</string>
+        </dict>
+    </dict>
+</dict>
+</plist>
